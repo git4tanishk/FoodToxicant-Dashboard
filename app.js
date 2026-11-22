@@ -315,27 +315,21 @@ function updateMetrics(hasFilters) {
   const topHlt   = topCounts(data, getHlt, 3);
   const topCtr   = topCountsSingle(data, getCtr, 1);
 
-if (!hasFilters) {
-    makeBarChart('yearChart', yrLabels, yrVals, '#064e3b');
-    makeDoughnut('catChart',
-      catEntries.map(e => e[0]),
-      catEntries.map(e => e[1]),
-      catEntries.map(e => CAT_COLORS[e[0]] || '#64748b')
-    );
-    makeBarChart('toxChart', toxTop.map(e=>trim(e[0],14)), toxTop.map(e=>e[1]), '#ea580c', true);
-    makeBarChart('hltChart', hltTop.map(e=>trim(e[0],18)), hltTop.map(e=>e[1]), '#064e3b', true);
-    makeBarChart('prdChart', prdTop.map(e=>trim(e[0],14)), prdTop.map(e=>e[1]), '#16a34a', true);
-    makeBarChart('orgChart', orgTop.map(e=>trim(e[0],14)), orgTop.map(e=>e[1]), '#047857', true);
+  if (!hasFilters) {
+    document.getElementById('mTotal').textContent      = total.toLocaleString();
+    document.getElementById('mJournals').textContent   = journals.toLocaleString();
+    document.getElementById('mPeakYear').textContent   = peak;
+    document.getElementById('mTopTox').textContent     = topTox[0] ? topTox[0][0].split(' ')[0] : '—';
+    document.getElementById('mTopHlt').textContent     = topHlt[0] ? topHlt[0][0].split(' ').slice(0,2).join(' ') : '—';
+    document.getElementById('mTopCountry').textContent = topCtr[0] ? topCtr[0][0] : '—';
+    document.getElementById('badgeTotal').textContent  = total.toLocaleString() + ' Papers';
   } else {
-    makeBarChart('fYearChart', yrLabels, yrVals, '#064e3b');
-    makeDoughnut('fCatChart',
-      catEntries.map(e => e[0]),
-      catEntries.map(e => e[1]),
-      catEntries.map(e => CAT_COLORS[e[0]] || '#64748b')
-    );
-    makeBarChart('fHltChart', hltTop.map(e=>trim(e[0],16)), hltTop.map(e=>e[1]), '#ea580c', true);
+    document.getElementById('fmTotal').textContent    = total.toLocaleString();
+    document.getElementById('fmJournals').textContent = journals.toLocaleString();
+    document.getElementById('fmPeak').textContent     = peak;
+    document.getElementById('fmTopTox').textContent   = topTox[0] ? topTox[0][0].split(' ')[0] : '—';
   }
-  
+
   const start = (PAGE-1)*PER_PAGE+1;
   const end   = Math.min(PAGE*PER_PAGE, total);
   document.getElementById('showCount').innerHTML =
@@ -429,24 +423,24 @@ function updateCharts(hasFilters) {
   const orgTop = topCounts(data, getOrg, 8);
 
   if (!hasFilters) {
-    makeBarChart('yearChart', yrLabels, yrVals, '#0f4c81');
+    makeBarChart('yearChart', yrLabels, yrVals, '#064e3b');
     makeDoughnut('catChart',
       catEntries.map(e => e[0]),
       catEntries.map(e => e[1]),
       catEntries.map(e => CAT_COLORS[e[0]] || '#64748b')
     );
-    makeBarChart('toxChart', toxTop.map(e=>trim(e[0],14)), toxTop.map(e=>e[1]), '#0f4c81', true);
-    makeBarChart('hltChart', hltTop.map(e=>trim(e[0],18)), hltTop.map(e=>e[1]), '#0d9488', true);
-    makeBarChart('prdChart', prdTop.map(e=>trim(e[0],14)), prdTop.map(e=>e[1]), '#0f4c81', true);
-    makeBarChart('orgChart', orgTop.map(e=>trim(e[0],14)), orgTop.map(e=>e[1]), '#0d9488', true);
+    makeBarChart('toxChart', toxTop.map(e=>trim(e[0],14)), toxTop.map(e=>e[1]), '#ea580c', true);
+    makeBarChart('hltChart', hltTop.map(e=>trim(e[0],18)), hltTop.map(e=>e[1]), '#064e3b', true);
+    makeBarChart('prdChart', prdTop.map(e=>trim(e[0],14)), prdTop.map(e=>e[1]), '#16a34a', true);
+    makeBarChart('orgChart', orgTop.map(e=>trim(e[0],14)), orgTop.map(e=>e[1]), '#047857', true);
   } else {
-    makeBarChart('fYearChart', yrLabels, yrVals, '#0f4c81');
+    makeBarChart('fYearChart', yrLabels, yrVals, '#064e3b');
     makeDoughnut('fCatChart',
       catEntries.map(e => e[0]),
       catEntries.map(e => e[1]),
       catEntries.map(e => CAT_COLORS[e[0]] || '#64748b')
     );
-    makeBarChart('fHltChart', hltTop.map(e=>trim(e[0],16)), hltTop.map(e=>e[1]), '#0d9488', true);
+    makeBarChart('fHltChart', hltTop.map(e=>trim(e[0],16)), hltTop.map(e=>e[1]), '#ea580c', true);
   }
 }
 
