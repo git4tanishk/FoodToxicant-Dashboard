@@ -7,20 +7,20 @@ const F = { t:0, j:1, y:2, k:3, cat:4, pmid:5, abs:6, tox:7, org:8, hlt:9, prd:1
 
 /* ── Category colours ────────────────────────────────────────── */
 const CAT_COLORS = {
-  'Major Toxicants':             '#0f4c81',
-  'Processing Toxicants':        '#b45309',
-  'Microbial Toxicants':         '#991b1b',
+  'Major Toxicants':             '#064e3b',
+  'Processing Toxicants':        '#ea580c',
+  'Microbial Toxicants':         '#16a34a',
   'Food Matrices':               '#475569',
   'Exposure & Toxicity':         '#0d9488',
-  'Food Chemicals':              '#1e40af',
-  'Lab Methods':                 '#4338ca',
+  'Food Chemicals':              '#d97706',
+  'Lab Methods':                 '#15803d',
   'Environmental Contamination': '#64748b',
-  'Microplastics':               '#0369a1',
+  'Microplastics':               '#047857',
 };
 const CAT_COLOR_ARR = Object.values(CAT_COLORS);
-const CHART_COLORS = ['#0f4c81','#0d9488','#1e40af','#475569','#b45309','#991b1b','#0369a1','#4338ca','#64748b','#334155'];
-const gc = '#e2e8f0';
-const tc = '#475569';
+const CHART_COLORS = ['#064e3b','#ea580c','#16a34a','#0d9488','#d97706','#475569','#15803d','#047857','#64748b','#334155'];
+const gc = '#e2ebe6';
+const tc = '#3f524b';
 
 /* ── State ───────────────────────────────────────────────────── */
 const ACTIVE = { cat: new Set(), tox: new Set(), org: new Set(), hlt: new Set(), prd: new Set(), ing: new Set(), country: new Set() };
@@ -315,21 +315,27 @@ function updateMetrics(hasFilters) {
   const topHlt   = topCounts(data, getHlt, 3);
   const topCtr   = topCountsSingle(data, getCtr, 1);
 
-  if (!hasFilters) {
-    document.getElementById('mTotal').textContent      = total.toLocaleString();
-    document.getElementById('mJournals').textContent   = journals.toLocaleString();
-    document.getElementById('mPeakYear').textContent   = peak;
-    document.getElementById('mTopTox').textContent     = topTox[0] ? topTox[0][0].split(' ')[0] : '—';
-    document.getElementById('mTopHlt').textContent     = topHlt[0] ? topHlt[0][0].split(' ').slice(0,2).join(' ') : '—';
-    document.getElementById('mTopCountry').textContent = topCtr[0] ? topCtr[0][0] : '—';
-    document.getElementById('badgeTotal').textContent  = total.toLocaleString() + ' Papers';
+if (!hasFilters) {
+    makeBarChart('yearChart', yrLabels, yrVals, '#064e3b');
+    makeDoughnut('catChart',
+      catEntries.map(e => e[0]),
+      catEntries.map(e => e[1]),
+      catEntries.map(e => CAT_COLORS[e[0]] || '#64748b')
+    );
+    makeBarChart('toxChart', toxTop.map(e=>trim(e[0],14)), toxTop.map(e=>e[1]), '#ea580c', true);
+    makeBarChart('hltChart', hltTop.map(e=>trim(e[0],18)), hltTop.map(e=>e[1]), '#064e3b', true);
+    makeBarChart('prdChart', prdTop.map(e=>trim(e[0],14)), prdTop.map(e=>e[1]), '#16a34a', true);
+    makeBarChart('orgChart', orgTop.map(e=>trim(e[0],14)), orgTop.map(e=>e[1]), '#047857', true);
   } else {
-    document.getElementById('fmTotal').textContent    = total.toLocaleString();
-    document.getElementById('fmJournals').textContent = journals.toLocaleString();
-    document.getElementById('fmPeak').textContent     = peak;
-    document.getElementById('fmTopTox').textContent   = topTox[0] ? topTox[0][0].split(' ')[0] : '—';
+    makeBarChart('fYearChart', yrLabels, yrVals, '#064e3b');
+    makeDoughnut('fCatChart',
+      catEntries.map(e => e[0]),
+      catEntries.map(e => e[1]),
+      catEntries.map(e => CAT_COLORS[e[0]] || '#64748b')
+    );
+    makeBarChart('fHltChart', hltTop.map(e=>trim(e[0],16)), hltTop.map(e=>e[1]), '#ea580c', true);
   }
-
+  
   const start = (PAGE-1)*PER_PAGE+1;
   const end   = Math.min(PAGE*PER_PAGE, total);
   document.getElementById('showCount').innerHTML =
