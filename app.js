@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   Food Toxicants Research Dashboard — app.js
+   The FooD-ToX-MaP — app.js
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── Field indices in REC ────────────────────────────────────── */
@@ -7,20 +7,20 @@ const F = { t:0, j:1, y:2, k:3, cat:4, pmid:5, abs:6, tox:7, org:8, hlt:9, prd:1
 
 /* ── Category colours ────────────────────────────────────────── */
 const CAT_COLORS = {
-  'Major Toxicants':             '#4f8ef7',
-  'Processing Toxicants':        '#D85A30',
-  'Microbial Toxicants':         '#D4537E',
-  'Food Matrices':               '#BA7517',
-  'Exposure & Toxicity':         '#1D9E75',
-  'Food Chemicals':              '#639922',
-  'Lab Methods':                 '#7F77DD',
-  'Environmental Contamination': '#73726c',
-  'Microplastics':               '#5cf7f7',
+  'Major Toxicants':             '#0f4c81',
+  'Processing Toxicants':        '#b45309',
+  'Microbial Toxicants':         '#991b1b',
+  'Food Matrices':               '#475569',
+  'Exposure & Toxicity':         '#0d9488',
+  'Food Chemicals':              '#1e40af',
+  'Lab Methods':                 '#4338ca',
+  'Environmental Contamination': '#64748b',
+  'Microplastics':               '#0369a1',
 };
 const CAT_COLOR_ARR = Object.values(CAT_COLORS);
-const CHART_COLORS = ['#4f8ef7','#f75c5c','#5cf7b8','#f7c35c','#c35cf7','#f7a05a','#5cf7f7','#f75cf7','#a8ff78','#78a8ff'];
-const gc = 'rgba(255,255,255,0.05)';
-const tc = 'rgba(255,255,255,0.3)';
+const CHART_COLORS = ['#0f4c81','#0d9488','#1e40af','#475569','#b45309','#991b1b','#0369a1','#4338ca','#64748b','#334155'];
+const gc = '#e2e8f0';
+const tc = '#475569';
 
 /* ── State ───────────────────────────────────────────────────── */
 const ACTIVE = { cat: new Set(), tox: new Set(), org: new Set(), hlt: new Set(), prd: new Set(), ing: new Set(), country: new Set() };
@@ -79,18 +79,16 @@ function togglePill(el) {
   PAGE = 1; applyFilters();
 }
 
-/* ── NEW: Select All for a dimension ────────────────────────── */
+/* ── Select All for a dimension ──────────────────────────────── */
 function selectAllDim(dim) {
   const pillsId = dim + 'Pills';
   const container = document.getElementById(pillsId);
   if (!container) return;
 
-  // Only select visible pills (respects search filter)
   const visiblePills = Array.from(container.querySelectorAll('.pill')).filter(p => p.style.display !== 'none');
   const allSelected  = visiblePills.every(p => p.classList.contains('active'));
 
   if (allSelected) {
-    // If all already selected, deselect all (toggle behaviour)
     visiblePills.forEach(p => { ACTIVE[dim].delete(p.dataset.val); p.classList.remove('active'); });
     showToast(`Cleared all ${DIM_LABELS[dim]} filters`);
   } else {
@@ -206,7 +204,6 @@ function applyFilters() {
   const [y0, y1] = getYearRange();
   const sort = document.getElementById('sortSel').value;
 
-  // Pre-compute active cat indices
   const activeCatIdx = new Set();
   ACTIVE.cat.forEach(label => {
     const i = META.cats.indexOf(label);
@@ -235,7 +232,6 @@ function applyFilters() {
   else if (sort === 'year_asc') filtered.sort((a,b) => g(a,'y') - g(b,'y'));
   else filtered.sort((a,b) => (g(a,'t')||'').localeCompare(g(b,'t')||''));
 
-  // Sync year column sort icon
   const icon = document.getElementById('yearSortIcon');
   if (icon) {
     if (sort === 'year_desc') icon.textContent = '↓';
@@ -316,17 +312,17 @@ function updateMetrics(hasFilters) {
   const journals = new Set(data.map(r => g(r,'j'))).size;
   const peak     = peakYear(data);
   const topTox   = topCounts(data, getTox, 3);
-  const topHlt   = topCounts(data, getHlt, 1);
+  const topHlt   = topCounts(data, getHlt, 3);
   const topCtr   = topCountsSingle(data, getCtr, 1);
 
   if (!hasFilters) {
-    document.getElementById('mTotal').textContent     = total.toLocaleString();
-    document.getElementById('mJournals').textContent  = journals.toLocaleString();
-    document.getElementById('mPeakYear').textContent  = peak;
-    document.getElementById('mTopTox').textContent    = topTox[0] ? topTox[0][0].split(' ')[0] : '—';
-    document.getElementById('mTopHlt').textContent    = topHlt[0] ? topHlt[0][0].split(' ').slice(0,2).join(' ') : '—';
+    document.getElementById('mTotal').textContent      = total.toLocaleString();
+    document.getElementById('mJournals').textContent   = journals.toLocaleString();
+    document.getElementById('mPeakYear').textContent   = peak;
+    document.getElementById('mTopTox').textContent     = topTox[0] ? topTox[0][0].split(' ')[0] : '—';
+    document.getElementById('mTopHlt').textContent     = topHlt[0] ? topHlt[0][0].split(' ').slice(0,2).join(' ') : '—';
     document.getElementById('mTopCountry').textContent = topCtr[0] ? topCtr[0][0] : '—';
-    document.getElementById('badgeTotal').textContent = total.toLocaleString() + ' Papers';
+    document.getElementById('badgeTotal').textContent  = total.toLocaleString() + ' Papers';
   } else {
     document.getElementById('fmTotal').textContent    = total.toLocaleString();
     document.getElementById('fmJournals').textContent = journals.toLocaleString();
@@ -348,7 +344,7 @@ function buildOverviewText(total, journals, peak, topTox, topHlt) {
   const topT = topTox.slice(0,3).map(e=>e[0]).join(', ');
   const topH = topHlt.slice(0,3).map(e=>e[0]).join(', ');
   el.innerHTML = `
-    This dashboard indexes <strong>${total.toLocaleString()}</strong> original research papers on food toxicants and contaminants,
+    <strong>The FooD-ToX-MaP</strong> indexes <strong>${total.toLocaleString()}</strong> original research papers on food toxicants and contaminants,
     spanning <strong>${journals.toLocaleString()} unique journals</strong> from 2000 to 2026.
     Publication activity peaked in <strong>${peak}</strong>, reflecting growing global concern about chemical, microbial,
     and environmental contaminants in the food supply.
@@ -370,7 +366,7 @@ function makeBarChart(id, labels, data, color, horizontal=false) {
   if (!ctx) return;
   charts[id] = new Chart(ctx, {
     type: 'bar',
-    data: { labels, datasets: [{ data, backgroundColor: color+'99', borderColor: color, borderWidth: 1, borderRadius: 3 }] },
+    data: { labels, datasets: [{ data, backgroundColor: color, borderColor: color, borderWidth: 0, borderRadius: 3 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       indexAxis: horizontal ? 'y' : 'x',
@@ -378,8 +374,8 @@ function makeBarChart(id, labels, data, color, horizontal=false) {
         label: ctx => ` ${ctx.parsed[horizontal ? 'x' : 'y'].toLocaleString()} papers`
       }}},
       scales: {
-        x: { ticks: { color: tc, font: { size: 9 }, maxTicksLimit: horizontal ? 6 : 12 }, grid: { color: gc } },
-        y: { ticks: { color: tc, font: { size: 9 }, maxTicksLimit: horizontal ? 10 : 6 }, grid: { color: gc } }
+        x: { ticks: { color: tc, font: { size: 10 }, maxTicksLimit: horizontal ? 6 : 12 }, grid: { color: gc } },
+        y: { ticks: { color: tc, font: { size: 10 }, maxTicksLimit: horizontal ? 10 : 6 }, grid: { color: gc } }
       }
     }
   });
@@ -391,11 +387,11 @@ function makeDoughnut(id, labels, data, colors) {
   if (!ctx) return;
   charts[id] = new Chart(ctx, {
     type: 'doughnut',
-    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }] },
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderColor: '#ffffff', borderWidth: 2, hoverOffset: 4 }] },
     options: {
-      responsive: true, maintainAspectRatio: false, cutout: '58%',
+      responsive: true, maintainAspectRatio: false, cutout: '60%',
       plugins: {
-        legend: { display: true, position: 'right', labels: { color: tc, font: { size: 8 }, boxWidth: 8, padding: 5 } }
+        legend: { display: true, position: 'right', labels: { color: tc, font: { size: 9 }, boxWidth: 10, padding: 6 } }
       }
     }
   });
@@ -405,7 +401,6 @@ function updateCharts(hasFilters) {
   const data = hasFilters ? filtered : REC;
   const [y0, y1] = getYearRange();
 
-  // Year chart — show full range even when filtered
   const yrCnt = {};
   for (let y = y0; y <= y1; y++) yrCnt[y] = 0;
   data.forEach(r => {
@@ -416,41 +411,36 @@ function updateCharts(hasFilters) {
   const yrLabels = Object.keys(yrCnt).sort();
   const yrVals   = yrLabels.map(y => yrCnt[y]);
 
-  // Category counts
   const catCnt = {};
   data.forEach(r => { const c=getCat(r); catCnt[c]=(catCnt[c]||0)+1; });
   const catEntries = Object.entries(catCnt).sort((a,b)=>b[1]-a[1]).slice(0,8);
 
   const trim = (s, n) => s.length > n ? s.slice(0,n)+'…' : s;
 
-  // Top toxicants
   const toxTop = topCounts(data, getTox, 8);
-  // Top health effects
   const hltTop = topCounts(data, getHlt, 8);
-  // Top food products
   const prdTop = topCounts(data, getPrd, 8);
-  // Top organ systems
   const orgTop = topCounts(data, getOrg, 8);
 
   if (!hasFilters) {
-    makeBarChart('yearChart', yrLabels, yrVals, '#4f8ef7');
+    makeBarChart('yearChart', yrLabels, yrVals, '#0f4c81');
     makeDoughnut('catChart',
       catEntries.map(e => e[0]),
       catEntries.map(e => e[1]),
-      catEntries.map(e => CAT_COLORS[e[0]] || '#888')
+      catEntries.map(e => CAT_COLORS[e[0]] || '#64748b')
     );
-    makeBarChart('toxChart', toxTop.map(e=>trim(e[0],14)), toxTop.map(e=>e[1]), '#f75c5c', true);
-    makeBarChart('hltChart', hltTop.map(e=>trim(e[0],18)), hltTop.map(e=>e[1]), '#c35cf7', true);
-    makeBarChart('prdChart', prdTop.map(e=>trim(e[0],14)), prdTop.map(e=>e[1]), '#f7a05a', true);
-    makeBarChart('orgChart', orgTop.map(e=>trim(e[0],14)), orgTop.map(e=>e[1]), '#5cf7b8', true);
+    makeBarChart('toxChart', toxTop.map(e=>trim(e[0],14)), toxTop.map(e=>e[1]), '#0f4c81', true);
+    makeBarChart('hltChart', hltTop.map(e=>trim(e[0],18)), hltTop.map(e=>e[1]), '#0d9488', true);
+    makeBarChart('prdChart', prdTop.map(e=>trim(e[0],14)), prdTop.map(e=>e[1]), '#0f4c81', true);
+    makeBarChart('orgChart', orgTop.map(e=>trim(e[0],14)), orgTop.map(e=>e[1]), '#0d9488', true);
   } else {
-    makeBarChart('fYearChart', yrLabels, yrVals, '#4f8ef7');
+    makeBarChart('fYearChart', yrLabels, yrVals, '#0f4c81');
     makeDoughnut('fCatChart',
       catEntries.map(e => e[0]),
       catEntries.map(e => e[1]),
-      catEntries.map(e => CAT_COLORS[e[0]] || '#888')
+      catEntries.map(e => CAT_COLORS[e[0]] || '#64748b')
     );
-    makeBarChart('fHltChart', hltTop.map(e=>trim(e[0],16)), hltTop.map(e=>e[1]), '#c35cf7', true);
+    makeBarChart('fHltChart', hltTop.map(e=>trim(e[0],16)), hltTop.map(e=>e[1]), '#0d9488', true);
   }
 }
 
@@ -463,7 +453,7 @@ function renderTable() {
 
   const start = (PAGE-1)*PER_PAGE;
   const rows  = filtered.slice(start, Math.min(start+PER_PAGE, filtered.length));
-  const catColor = cat => CAT_COLORS[cat] || '#888';
+  const catColor = cat => CAT_COLORS[cat] || '#64748b';
 
   body.innerHTML = rows.map(r => {
     const pmid  = g(r,'pmid');
@@ -475,7 +465,6 @@ function renderTable() {
     const cat   = getCat(r);
     const title = escHtml(g(r,'t') || '');
 
-    // Safe base64 encode — handle special chars
     let rec64;
     try {
       rec64 = btoa(encodeURIComponent(JSON.stringify([g(r,'pmid'), g(r,'t'), g(r,'j'), g(r,'y'), g(r,'abs'), g(r,'cat')])));
@@ -565,7 +554,6 @@ function closeModal() {
 /* ── Keyboard shortcuts ──────────────────────────────────────── */
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeModal(); return; }
-  // Don't fire shortcuts when typing in an input
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
   if (e.key === 's' || e.key === 'S') { toggleSidebar(); return; }
   if (e.key === '/') {
@@ -593,7 +581,7 @@ function exportCSV() {
   const blob = new Blob([csv], { type: 'text/csv' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url; a.download = `food_toxicants_${filtered.length}_papers.csv`; a.click();
+  a.href = url; a.download = `food_tox_map_${filtered.length}_papers.csv`; a.click();
   URL.revokeObjectURL(url);
   showToast(`Exported ${filtered.length.toLocaleString()} papers as CSV`);
 }
